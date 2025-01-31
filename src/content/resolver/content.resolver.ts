@@ -1,6 +1,8 @@
-import { Logger } from '@nestjs/common'
-import { Resolver, Mutation, Args, Context, Query } from '@nestjs/graphql'
+import { Logger, UseGuards } from '@nestjs/common'
+import { Resolver, Args, Context, Query } from '@nestjs/graphql'
 import { ContentService } from 'src/content/service'
+import { ProvisionDto } from 'src/content/dto'
+import { AuthGuard } from 'src/user/guard'
 
 @Resolver()
 export class ContentResolver {
@@ -8,14 +10,10 @@ export class ContentResolver {
 
   constructor(private readonly contentService: ContentService) {}
 
-  @Mutation(() => String)
-  async importCsv(@Args('csvData') csvData: string, @Context('req') req) {
-    this.logger.log(`Performing import csv to user=${req.user.id}`)
-    return this.contentService.processCsv(csvData)
-  }
-
-  @Query(() => String)
-  hello(): string {
-    return 'Hello'
+  @UseGuards(AuthGuard)
+  @Query(() => ProvisionDto)
+  provision(@Args('content_id') contentId: string, @Context('req') req): Promise<ProvisionDto> {
+    this.logger.log(`Provisioning content=${contentId} to user=${req.user.id}`)
+    return this.contentService.provision(contentId)
   }
 }

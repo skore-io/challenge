@@ -6,15 +6,11 @@ import { Content } from 'src/content/entity'
 export class ContentRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async insertContent(title: string, type: string, description: string): Promise<Content> {
+  async findOne(contentId: string): Promise<Content | null> {
     const [content] = await this.dataSource.query<Content[]>(
-      `
-        INSERT INTO contents (title, type, description, created_at, updated_at)
-        VALUES ('${title}', '${type}', '${description}', NOW(), NOW())
-        RETURNING *
-      `,
+      `SELECT * FROM contents WHERE id = '${contentId}' AND deleted_at IS NULL LIMIT 1`,
     )
 
-    return content
+    return content || null
   }
 }

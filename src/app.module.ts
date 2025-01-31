@@ -1,11 +1,10 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { HttpStatus, Module } from '@nestjs/common'
+import { GraphQLError } from 'graphql'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { BullModule } from '@nestjs/bull'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ContentModule } from 'src/content'
 import { UserModule } from 'src/user'
 import { CompanyModule } from 'src/company'
-import { AuthMiddleware } from 'src/user/middleware'
 import { ApolloDriver } from '@nestjs/apollo'
 import { ConfigModule } from '@nestjs/config'
 
@@ -21,21 +20,26 @@ import { ConfigModule } from '@nestjs/config'
       autoLoadEntities: true,
       synchronize: false,
     }),
-    BullModule.forRoot({
-      redis: {
-        host: 'localhost',
-        port: 6379,
+    ConfigModule.forRoot({ isGlobal: true }),
+    GraphQLModule.forRoot({
+      autoSchemaFile: true,
+      driver: ApolloDriver,
+      introspection: true,
+      playground: true,
+      formatError: (error: GraphQLError) => {
+        return {
+          message: error.extensions?.originalError?.['message'],
+          status_code:
+            Number(error.extensions?.originalError?.['statusCode']) ||
+            Number(error?.extensions?.code) ||
+            HttpStatus.BAD_REQUEST,
+          details: error?.extensions?.exception?.['details'] || error.extensions?.details,
+        }
       },
     }),
-    ConfigModule.forRoot({ isGlobal: true }),
-    GraphQLModule.forRoot({ autoSchemaFile: true, driver: ApolloDriver }),
     ContentModule,
     UserModule,
     CompanyModule,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('{*splat}')
-  }
-}
+export class AppModule {}

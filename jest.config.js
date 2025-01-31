@@ -5,7 +5,6 @@ module.exports = {
   },
   testMatch: ['<rootDir>/test/**/*.test.ts'],
   testEnvironment: 'node',
-  setupFiles: ['./test/setup.ts'],
   restoreMocks: true,
   clearMocks: true,
   resetMocks: true,
@@ -16,7 +15,14 @@ module.exports = {
     '!src/**/database/**',
     '!src/**/entity/**',
   ],
-  coveragePathIgnorePatterns: ['/node_modules/', '/test/', '/config/', '/type/', '/error/'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/test/',
+    '/config/',
+    '/type/',
+    '/error/',
+    '/dto/',
+  ],
   coverageReporters: ['lcovonly', 'text'],
   coverageThreshold: {
     global: {

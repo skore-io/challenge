@@ -1,81 +1,138 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { InjectQueue } from '@nestjs/bull'
-import { Queue } from 'bull'
+import * as fs from 'fs'
+import * as path from 'path'
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common'
+import { ContentRepository } from 'src/content/repository'
+import { ProvisionDto } from 'src/content/dto'
 
 @Injectable()
 export class ContentService {
   private readonly logger = new Logger(ContentService.name)
+  private readonly expirationTime = 3600 // 1 hour
 
-  constructor(@InjectQueue('import_contents') private readonly csvQueue: Queue) {}
+  constructor(private readonly contentRepository: ContentRepository) {}
 
-  async processCsv(csvData: string): Promise<string> {
-    if (!csvData || csvData.trim().length === 0) {
-      throw new Error('The CSV file is empty or invalid')
+  async provision(contentId: string): Promise<ProvisionDto> {
+    if (!contentId) {
+      this.logger.error(`Invalid Content ID: ${contentId}`)
+      throw new UnprocessableEntityException(`Content ID is invalid: ${contentId}`)
     }
 
-    const lines = csvData.split('\n')
-    const header = lines[0].split(',')
+    this.logger.log(`Provisioning content for id=${contentId}`)
+    let content
 
-    if (!this.validateHeader(header)) {
-      this.logger.error(`CSV header is incorrect: ${header}`)
-      return 'CSV header error'
-    }
-
-    lines.slice(1).forEach(async (line, index) => {
-      if (!line.trim()) return
-
-      let [title, type, description] = line.split(',')
-      title = title?.trim()
-      type = type?.trim()
-      description = description?.trim()
-
-      if (!title || !type || !description) {
-        this.logger.warn(`Row ${index + 2} ignored: missing values`)
-        return
-      }
-
-      if (!this.isValidType(type)) {
-        this.logger.warn(`Row ${index + 2} ignored: invalid type (${type})`)
-        return
-      }
-
-      const priority = Math.floor(Math.random() * 10)
-      await this.addToQueue(title, type, description, priority, index + 1)
-    })
-
-    return 'CSV processed!'
-  }
-
-  private async addToQueue(
-    title: string,
-    type: string,
-    description: string,
-    priority: number,
-    lineNumber: number,
-  ) {
     try {
-      this.logger.log(`Adding row=${lineNumber} with priority=${priority} to queue`)
-
-      await this.csvQueue.add(
-        { title, type, description },
-        { priority, attempts: Math.floor(Math.random() * 5) + 1 },
-      )
+      content = await this.contentRepository.findOne(contentId)
     } catch (error) {
-      this.logger.error(`Error adding row=${lineNumber} queue: ${error}`)
+      this.logger.error(`Database error while fetching content: ${error}`)
+      throw new NotFoundException(`Database error: ${error}`)
     }
+
+    if (!content) {
+      this.logger.warn(`Content not found for id=${contentId}`)
+      throw new NotFoundException(`Content not found: ${contentId}`)
+    }
+
+    const filePath = content.url ? content.url : undefined
+    let bytes = 0
+
+    try {
+      bytes = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
+    } catch (error) {
+      this.logger.error(`File system error: ${error}`)
+    }
+
+    const url = this.generateSignedUrl(content.url || '')
+
+    if (!content.type) {
+      this.logger.warn(`Missing content type for ID=${contentId}`)
+      throw new BadRequestException('Content type is missing')
+    }
+
+    if (['pdf', 'image', 'video', 'link'].includes(content.type)) {
+      switch (content.type) {
+        case 'pdf':
+          return {
+            id: content.id,
+            title: content.title,
+            cover: content.cover,
+            created_at: content.created_at,
+            description: content.description,
+            total_likes: content.total_likes,
+            type: 'pdf',
+            url,
+            allow_download: true,
+            is_embeddable: false,
+            format: 'pdf',
+            bytes,
+            metadata: {
+              author: 'Unknown',
+              pages: Math.floor(bytes / 50000) || 1,
+              encrypted: false,
+            },
+          }
+        case 'image':
+          return {
+            id: content.id,
+            title: content.title,
+            cover: content.cover,
+            created_at: content.created_at,
+            description: content.description,
+            total_likes: content.total_likes,
+            type: 'image',
+            url,
+            allow_download: true,
+            is_embeddable: true,
+            format: path.extname(content.url || '').slice(1) || 'jpg',
+            bytes,
+            metadata: { resolution: '1920x1080', aspect_ratio: '16:9' },
+          }
+        case 'video':
+          return {
+            id: content.id,
+            title: content.title,
+            cover: content.cover,
+            created_at: content.created_at,
+            description: content.description,
+            total_likes: content.total_likes,
+            type: 'video',
+            url,
+            allow_download: false,
+            is_embeddable: true,
+            format: path.extname(content.url || '').slice(1) || 'mp4',
+            bytes,
+            metadata: { duration: Math.floor(bytes / 100000) || 10, resolution: '1080p' },
+          }
+        case 'link':
+          return {
+            id: content.id,
+            title: content.title,
+            cover: content.cover,
+            created_at: content.created_at,
+            description: content.description,
+            total_likes: content.total_likes,
+            type: 'link',
+            url: content.url || 'http://default.com',
+            allow_download: false,
+            is_embeddable: true,
+            format: null,
+            bytes: 0,
+            metadata: { trusted: content.url?.includes('https') || false },
+          }
+      }
+    }
+
+    this.logger.warn(`Unsupported content type for ID=${contentId}, type=${content.type}`)
+    throw new BadRequestException(`Unsupported content type: ${content.type}`)
   }
 
-  private validateHeader(header: string[]): boolean {
-    const expectedHeaders = ['title', 'type', 'description']
-    return (
-      header.length === expectedHeaders.length &&
-      header.every((h, i) => h.trim().toLowerCase() === expectedHeaders[i])
-    )
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private isValidType(type: string): boolean {
-    // TODO: I didn't have time to finish this, so I'll leave it here for us to validate in the future
-    return true
+  private generateSignedUrl(originalUrl: string): string {
+    const expires = Math.floor(Date.now() / 1000) + this.expirationTime
+    return `${originalUrl}?expires=${expires}&signature=${Math.random().toString(36).substring(7)}`
   }
 }
