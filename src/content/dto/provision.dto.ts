@@ -18,7 +18,7 @@ export class ProvisionDto {
   @Field(() => String, { nullable: true })
   cover?: string
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   url: string
 
   @Field(() => Date)
@@ -35,6 +35,9 @@ export class ProvisionDto {
 
   @Field(() => Int)
   bytes: number
+
+  @Field(() => String, { nullable: true })
+  text_content: string
 
   @Field(() => Int)
   total_likes: number

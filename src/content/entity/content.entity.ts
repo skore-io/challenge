@@ -1,14 +1,15 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm'
 import { Company } from 'src/company/entity'
+import { ContentType } from 'src/content/enum/content-type.enum'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity('contents')
 export class Content {
@@ -18,20 +19,23 @@ export class Content {
   @Column()
   title: string
 
-  @Column()
-  type: string
+  @Column({ type: 'enum', enum: ContentType })
+  type: ContentType
 
-  @Column()
+  @Column({ nullable: true })
   description?: string
 
-  @Column()
-  url: string
+  @Column({ nullable: true })
+  url?: string
 
-  @Column()
+  @Column({ nullable: true })
   cover?: string
 
   @Column({ type: 'int' })
   total_likes: number
+
+  @Column({ nullable: true, type: 'text' })
+  text_content: string
 
   @CreateDateColumn()
   created_at: Date

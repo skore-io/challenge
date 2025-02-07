@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { suite, test } from '@testdeck/jest'
-import { ContentService } from 'src/content/service'
-import { ContentRepository } from 'src/content/repository'
 import {
   BadRequestException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common'
-import { Content } from 'src/content/entity'
+import { Test, TestingModule } from '@nestjs/testing'
+import { suite, test } from '@testdeck/jest'
 import * as fs from 'fs'
+import { Content } from 'src/content/entity'
+import { ContentRepository } from 'src/content/repository'
+import { ContentService } from 'src/content/service'
 
 @suite
 export class ContentServiceUnitTest {
@@ -209,14 +209,23 @@ export class ContentServiceUnitTest {
 
   @test
   async '[provision] Should log file system errors but not fail'() {
-    jest.spyOn(this.contentRepository, 'findOne').mockResolvedValue(this.mockContent('pdf', 'pdf'))
-    jest.spyOn(fs, 'existsSync').mockImplementation(() => {
+    jest.spyOn(this.contentRepository, 'findOne').mockResolvedValue({
+      id: '4372ebd1-2ee8-4501-9ed5-549df46d0eb0',
+      title: 'Test PDF',
+      description: 'Sample description',
+      url: '/fake/path/to/file.pdf',
+      created_at: new Date(),
+      total_likes: 10,
+      type: 'pdf',
+      text_content: '',
+    } as Content)
+
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    jest.spyOn(fs, 'statSync').mockImplementation(() => {
       throw new Error('File system error')
     })
 
-    const loggerSpy = jest
-      .spyOn(this.contentService['logger'], 'error')
-      .mockImplementation(() => {})
+    const loggerSpy = jest.spyOn(this.contentService['logger'], 'error')
 
     const result = await this.contentService.provision('4372ebd1-2ee8-4501-9ed5-549df46d0eb0')
 

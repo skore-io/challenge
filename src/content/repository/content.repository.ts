@@ -1,16 +1,28 @@
-import { DataSource } from 'typeorm'
-import { Injectable } from '@nestjs/common'
-import { Content } from 'src/content/entity'
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { Content } from 'src/content/entity/content.entity'
+import { DataSource, Repository } from 'typeorm'
 
 @Injectable()
 export class ContentRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  private readonly contentRepo: Repository<Content>
 
-  async findOne(contentId: string): Promise<Content | null> {
-    const [content] = await this.dataSource.query<Content[]>(
-      `SELECT * FROM contents WHERE id = '${contentId}' AND deleted_at IS NULL LIMIT 1`,
-    )
+  constructor(private readonly dataSource: DataSource) {
+    this.contentRepo = this.dataSource.getRepository(Content)
+  }
 
-    return content || null
+  async findOne(contentId: string): Promise<Content> {
+    if (!contentId) {
+      throw new BadRequestException('Content ID cannot be empty.')
+    }
+
+    const content = await this.contentRepo.findOne({
+      where: { id: contentId, deleted_at: null },
+    })
+
+    if (!content) {
+      return null
+    }
+
+    return content
   }
 }
