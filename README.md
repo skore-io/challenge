@@ -6,7 +6,8 @@
  - txt adicionado no retorno de conteúdo
 
 ## Problemas encontrados
- - a falha principal de segurança foi encontrada e corrigida, no app.module as informações do banco de dados estavam expostas chumbadas no código
+ - falha de segurança foi encontrada e corrigida, no app.module as informações do banco de dados estavam expostas chumbadas no código
+ - sql injection no content repository, foi adicionado as propriedades do type orm para buscar
 
 ## Problemas para corrigir na aplicação
  - os paths da aplicação estão com problemas, está com conflito para rodar a aplicação e rodar os testes, será necessário corrigir criando alias e ajustando no arquivo tsconfig

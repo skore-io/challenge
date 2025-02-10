@@ -24,9 +24,7 @@ module.exports = {
     '/dto/',
   ],
   moduleNameMapper: {
-    "^@user/(.*)$": "<rootDir>/src/user/$1",
-    "^@content/(.*)$": "<rootDir>/src/content/$1",
-    "^@company/(.*)$": "<rootDir>/src/company/$1"
+    "^src/(.*)$": "<rootDir>/src/$1",
   },
   coverageReporters: ['lcovonly', 'text'],
   coverageThreshold: {
