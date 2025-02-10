@@ -6,12 +6,10 @@
  - txt adicionado no retorno de conteúdo
 
 ## Problemas encontrados
- - a falha principal de segurança foi encontrada, no app.module as informações do banco de dados estão expostas
+ - a falha principal de segurança foi encontrada e corrigida, no app.module as informações do banco de dados estavam expostas chumbadas no código
 
 ## Problemas para corrigir na aplicação
  - os paths da aplicação estão com problemas, está com conflito para rodar a aplicação e rodar os testes, será necessário corrigir criando alias e ajustando no arquivo tsconfig
- - a falha de segurança precisa ser ajustada, porém algum problema está impedindo dos .envs serem usados na aplicação de forma geral
-
 
 ## OBS
  - devido ao problema nos paths para rodar os testes será necessário mudar os paths dos testes manualmente

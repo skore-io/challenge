@@ -6,22 +6,27 @@ import { ContentModule } from './content'
 import { UserModule } from './user'
 import { CompanyModule } from './company'
 import { ApolloDriver } from '@nestjs/apollo'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
-    // FALHA CRITICA, VALORES DEVERIAM ESTAR NO .ENV
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'challenge',
-      autoLoadEntities: true,
-      synchronize: false,
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
-    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: parseInt(configService.get<string>('DB_PORT'), 10),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE_NAME'),
+        autoLoadEntities: true,
+        synchronize: false,
+      }),
+      inject: [ConfigService],
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
       driver: ApolloDriver,
@@ -38,6 +43,7 @@ import { ConfigModule } from '@nestjs/config'
         }
       },
     }),
+
     ContentModule,
     UserModule,
     CompanyModule,
