@@ -10,22 +10,6 @@ import {
 import { ContentRepository } from '../repository'
 import { ProvisionDto } from '../dto'
 
-interface Content {
-  id: string;
-  title: string;
-  cover?: string;
-  created_at: Date;
-  description?: string;
-  total_likes: number;
-  type?: string;
-  url?: string;
-}
-
-interface Metadata {
-  [key: string]: any;
-}
-
-
 @Injectable()
 export class ContentService {
   private readonly logger = new Logger(ContentService.name)
@@ -56,6 +40,7 @@ export class ContentService {
     }
   }
 
+  // caso preciso de alguma propriedade para o formato txt, só adicionar
   generateMetadataForType(content: Content, bytes: number): Metadata {
     switch (content.type) {
       case 'pdf':
@@ -75,6 +60,7 @@ export class ContentService {
     }
   }
 
+  // caso preciso de alguma propriedade para o formato txt, só adicionar
   createProvisionResponse(content: Content, bytes: number, url: string, metadata: Metadata): ProvisionDto {
     return {
       id: content.id,
