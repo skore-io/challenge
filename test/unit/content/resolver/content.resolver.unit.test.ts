@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { suite, test } from '@testdeck/jest'
-import { ContentResolver } from 'src/content/resolver'
-import { ContentService } from 'src/content/service'
-import { ProvisionDto } from 'src/content/dto'
+import { ContentResolver } from '../../../../src/content/resolver'
+import { ContentService } from '../../../../src/content/service'
+import { ProvisionDto } from '../../../../src/content/dto'
 import { ExecutionContext, Logger } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { AuthService } from 'src/user/service'
-import { UserRepository } from 'src/user/repository'
+import { AuthService } from '../../../../src/user/service'
+import { UserRepository } from '../../../../src/user/repository'
 
 @suite
 export class ContentResolverUnitTest {

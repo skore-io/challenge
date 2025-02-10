@@ -1,4 +1,9 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "baseUrl": "./src",
+  "paths": {
+    "*": [
+      "*"
+    ]
+  }
 }

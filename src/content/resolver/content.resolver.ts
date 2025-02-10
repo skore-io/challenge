@@ -1,14 +1,14 @@
 import { Logger, UseGuards } from '@nestjs/common'
 import { Resolver, Args, Context, Query } from '@nestjs/graphql'
-import { ContentService } from 'src/content/service'
-import { ProvisionDto } from 'src/content/dto'
-import { AuthGuard } from 'src/user/guard'
+import { ContentService } from '../service'
+import { ProvisionDto } from '../dto'
+import { AuthGuard } from '../../user/guard'
 
 @Resolver()
 export class ContentResolver {
   private readonly logger = new Logger(ContentResolver.name)
 
-  constructor(private readonly contentService: ContentService) {}
+  constructor(private readonly contentService: ContentService) { }
 
   @UseGuards(AuthGuard)
   @Query(() => ProvisionDto)

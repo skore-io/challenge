@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { suite, test } from '@testdeck/jest'
-import { ContentRepository } from 'src/content/repository'
+import { ContentRepository } from '../../../../src/content/repository'
 import { DataSource } from 'typeorm'
-import { Content } from 'src/content/entity'
+import { Content } from '../../../../src/content/entity'
 
 @suite
 export class ContentRepositoryUnitTest {

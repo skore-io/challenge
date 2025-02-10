@@ -7,131 +7,125 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common'
-import { ContentRepository } from 'src/content/repository'
-import { ProvisionDto } from 'src/content/dto'
+import { ContentRepository } from '../repository'
+import { ProvisionDto } from '../dto'
+
+interface Content {
+  id: string;
+  title: string;
+  cover?: string;
+  created_at: Date;
+  description?: string;
+  total_likes: number;
+  type?: string;
+  url?: string;
+}
+
+interface Metadata {
+  [key: string]: any;
+}
+
 
 @Injectable()
 export class ContentService {
   private readonly logger = new Logger(ContentService.name)
   private readonly expirationTime = 3600 // 1 hour
 
-  constructor(private readonly contentRepository: ContentRepository) {}
+  constructor(private readonly contentRepository: ContentRepository) { }
 
-  async provision(contentId: string): Promise<ProvisionDto> {
-    if (!contentId) {
-      this.logger.error(`Invalid Content ID: ${contentId}`)
-      throw new UnprocessableEntityException(`Content ID is invalid: ${contentId}`)
-    }
-
-    this.logger.log(`Provisioning content for id=${contentId}`)
-    let content
-
+  async getContent(contentId: string): Promise<Content | null> {
     try {
-      content = await this.contentRepository.findOne(contentId)
-    } catch (error) {
-      this.logger.error(`Database error while fetching content: ${error}`)
-      throw new NotFoundException(`Database error: ${error}`)
-    }
-
-    if (!content) {
-      this.logger.warn(`Content not found for id=${contentId}`)
-      throw new NotFoundException(`Content not found: ${contentId}`)
-    }
-
-    const filePath = content.url ? content.url : undefined
-    let bytes = 0
-
-    try {
-      bytes = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0
-    } catch (error) {
-      this.logger.error(`File system error: ${error}`)
-    }
-
-    const url = this.generateSignedUrl(content.url || '')
-
-    if (!content.type) {
-      this.logger.warn(`Missing content type for ID=${contentId}`)
-      throw new BadRequestException('Content type is missing')
-    }
-
-    if (['pdf', 'image', 'video', 'link'].includes(content.type)) {
-      switch (content.type) {
-        case 'pdf':
-          return {
-            id: content.id,
-            title: content.title,
-            cover: content.cover,
-            created_at: content.created_at,
-            description: content.description,
-            total_likes: content.total_likes,
-            type: 'pdf',
-            url,
-            allow_download: true,
-            is_embeddable: false,
-            format: 'pdf',
-            bytes,
-            metadata: {
-              author: 'Unknown',
-              pages: Math.floor(bytes / 50000) || 1,
-              encrypted: false,
-            },
-          }
-        case 'image':
-          return {
-            id: content.id,
-            title: content.title,
-            cover: content.cover,
-            created_at: content.created_at,
-            description: content.description,
-            total_likes: content.total_likes,
-            type: 'image',
-            url,
-            allow_download: true,
-            is_embeddable: true,
-            format: path.extname(content.url || '').slice(1) || 'jpg',
-            bytes,
-            metadata: { resolution: '1920x1080', aspect_ratio: '16:9' },
-          }
-        case 'video':
-          return {
-            id: content.id,
-            title: content.title,
-            cover: content.cover,
-            created_at: content.created_at,
-            description: content.description,
-            total_likes: content.total_likes,
-            type: 'video',
-            url,
-            allow_download: false,
-            is_embeddable: true,
-            format: path.extname(content.url || '').slice(1) || 'mp4',
-            bytes,
-            metadata: { duration: Math.floor(bytes / 100000) || 10, resolution: '1080p' },
-          }
-        case 'link':
-          return {
-            id: content.id,
-            title: content.title,
-            cover: content.cover,
-            created_at: content.created_at,
-            description: content.description,
-            total_likes: content.total_likes,
-            type: 'link',
-            url: content.url || 'http://default.com',
-            allow_download: false,
-            is_embeddable: true,
-            format: null,
-            bytes: 0,
-            metadata: { trusted: content.url?.includes('https') || false },
-          }
+      const content = await this.contentRepository.findOne(contentId);
+      if (!content) {
+        this.logger.warn(`Content not found for id=${contentId}`);
+        throw new NotFoundException(`Content not found: ${contentId}`);
       }
+      return content;
+    } catch (error) {
+      this.logger.error(`Error fetching content: ${error}`);
+      throw new NotFoundException(`Database error: ${error}`);
     }
-
-    this.logger.warn(`Unsupported content type for ID=${contentId}, type=${content.type}`)
-    throw new BadRequestException(`Unsupported content type: ${content.type}`)
   }
 
-  private generateSignedUrl(originalUrl: string): string {
+  async getFileSize(filePath: string): Promise<number> {
+    try {
+      return fs.existsSync(filePath) ? fs.statSync(filePath).size : 0;
+    } catch (error) {
+      this.logger.error(`File system error: ${error}`);
+      return 0;
+    }
+  }
+
+  generateMetadataForType(content: Content, bytes: number): Metadata {
+    switch (content.type) {
+      case 'pdf':
+        return {
+          author: 'Unknown',
+          pages: Math.floor(bytes / 50000) || 1,
+          encrypted: false,
+        };
+      case 'image':
+        return { resolution: '1920x1080', aspect_ratio: '16:9' };
+      case 'video':
+        return { duration: Math.floor(bytes / 100000) || 10, resolution: '1080p' };
+      case 'link':
+        return { trusted: content.url?.includes('https') || false };
+      default:
+        return {};
+    }
+  }
+
+  createProvisionResponse(content: Content, bytes: number, url: string, metadata: Metadata): ProvisionDto {
+    return {
+      id: content.id,
+      title: content.title,
+      cover: content.cover,
+      created_at: content.created_at,
+      description: content.description,
+      total_likes: content.total_likes,
+      type: content.type!,
+      url,
+      allow_download: content.type !== 'link',
+      is_embeddable: content.type !== 'link',
+      format: path.extname(content.url || '').slice(1) || null,
+      bytes,
+      metadata,
+    };
+  }
+
+  async provisionContent(contentId: string): Promise<ProvisionDto> {
+    if (!contentId) {
+      this.logger.error(`Invalid Content ID: ${contentId}`);
+      throw new UnprocessableEntityException(`Content ID is invalid: ${contentId}`);
+    }
+
+    this.logger.log(`Provisioning content for id=${contentId}`);
+
+    const content = await this.getContent(contentId);
+    const filePath = content.url || '';
+    const bytes = await this.getFileSize(filePath);
+    const url = this.generateSignedUrl(content.url || '');
+
+    if (!content.type) {
+      this.logger.warn(`Missing content type for ID=${contentId}`);
+      throw new BadRequestException('Content type is missing');
+    }
+
+    const metadata = this.generateMetadataForType(content, bytes);
+
+    return this.createProvisionResponse(content, bytes, url, metadata);
+  }
+
+  async provision(contentId: string): Promise<ProvisionDto> {
+    try {
+      return await this.provisionContent(contentId);
+    } catch (error) {
+      this.logger.error(`Error during content provisioning: ${error}`);
+      throw new BadRequestException(`Error provisioning content: ${error}`);
+    }
+  }
+
+  generateSignedUrl(originalUrl: string): string {
     const expires = Math.floor(Date.now() / 1000) + this.expirationTime
     return `${originalUrl}?expires=${expires}&signature=${Math.random().toString(36).substring(7)}`
   }

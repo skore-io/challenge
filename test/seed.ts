@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 import { DataSource } from 'typeorm'
-import { User } from 'src/user/entity'
-import { Company } from 'src/company/entity'
-import { AppDataSource } from 'src/database/data-source.database'
-import { Content } from 'src/content/entity'
+import { User } from '../src/user/entity'
+import { Company } from '../src/company/entity'
+import { AppDataSource } from '../src/database/data-source.database'
+import { Content } from '../src/content/entity'
 
 export const seedDatabase = async (dataSource: DataSource) => {
   const queryRunner = dataSource.createQueryRunner()
@@ -108,6 +108,18 @@ export const seedDatabase = async (dataSource: DataSource) => {
         url: 'http://localhost:3000/uploads/video1.mp4',
         cover: 'http://localhost:3000/uploads/video1-cover.jpg',
         type: 'video',
+        total_likes: 10,
+        company: createdCompany1,
+      }),
+    ),
+    queryRunner.manager.save(
+      queryRunner.manager.create(Content, {
+        id: '12ed0f9e-ff27-4052-99c5-2022a438e5ee',
+        title: 'Clean Code',
+        description: 'Clean Code na prática.',
+        url: 'http://localhost:3000/uploads/conteudo.txt',
+        cover: 'http://localhost:3000/uploads/conteudo-cover.txt',
+        type: 'txt',
         total_likes: 10,
         company: createdCompany1,
       }),

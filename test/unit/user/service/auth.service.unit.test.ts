@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { suite, test } from '@testdeck/jest'
-import { AuthService } from 'src/user/service'
-import { UserRepository } from 'src/user/repository'
-import { User } from 'src/user/entity'
+import { AuthService } from 'user/service/index'
+import { UserRepository } from '../../../../src/user/repository'
+import { User } from '../../../../src/user/entity'
 import * as jwt from 'jsonwebtoken'
 
 @suite

@@ -2,14 +2,15 @@ import { HttpStatus, Module } from '@nestjs/common'
 import { GraphQLError } from 'graphql'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { GraphQLModule } from '@nestjs/graphql'
-import { ContentModule } from 'src/content'
-import { UserModule } from 'src/user'
-import { CompanyModule } from 'src/company'
+import { ContentModule } from './content'
+import { UserModule } from './user'
+import { CompanyModule } from './company'
 import { ApolloDriver } from '@nestjs/apollo'
 import { ConfigModule } from '@nestjs/config'
 
 @Module({
   imports: [
+    // FALHA CRITICA, VALORES DEVERIAM ESTAR NO .ENV
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -42,4 +43,4 @@ import { ConfigModule } from '@nestjs/config'
     CompanyModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

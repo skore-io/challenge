@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { suite, test } from '@testdeck/jest'
-import { UserRepository } from 'src/user/repository'
+import { UserRepository } from '../../../../src/user/repository'
 import { Repository } from 'typeorm'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { User } from 'src/user/entity'
+import { User } from '../../../../src/user/entity'
 
 @suite
 export class UserRepositoryUnitTest {

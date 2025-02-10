@@ -1,13 +1,13 @@
 import * as jwt from 'jsonwebtoken'
 import { Injectable, Logger } from '@nestjs/common'
-import { User } from 'src/user/entity'
-import { UserRepository } from 'src/user/repository'
+import { User } from '../../user/entity'
+import { UserRepository } from '../../user/repository'
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name)
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: UserRepository) { }
 
   async validateToken(token: string): Promise<User> {
     try {

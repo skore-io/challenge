@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { suite, test } from '@testdeck/jest'
-import { AuthGuard } from 'src/user/guard'
-import { AuthService } from 'src/user/service'
+import { AuthGuard } from '../../../../src/user/guard'
+import { AuthService } from '../../../../src/user/service'
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { User } from 'src/user/entity'
+import { User } from '../../../../src/user/entity'
 
 @suite
 export class AuthGuardUnitTest {

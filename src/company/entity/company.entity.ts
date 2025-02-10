@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
-import { User } from 'src/user/entity'
-import { Content } from 'src/content/entity'
+import { User } from '../../user/entity'
+import { Content } from '../../content/entity'
 
 @Entity('companies')
 export class Company {
