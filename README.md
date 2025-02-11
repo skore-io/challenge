@@ -19,13 +19,12 @@ Anotações:
 - O frontend rediriciona o conteúdo para o player do tipo equivalente, podendo ser implementado novos players separadamente no futuro.
 - Coloquei uma propriedade 'contentBody' para ler o corpo do txt
 - A barra de progresso responde a quantidade de conteúdo que foi clicado e "visto".
-
--implementei um arquivo de testes para o txt-strategy (usando os outros como base) para aumentar o nível de coverage, mas creio que exista uma maneira melhor de montar isso levando em conta que os strategies estão herdando a interface genérica que chama o provision
+- -implementei um arquivo de testes para o txt-strategy (usando os outros como base) para aumentar o nível de coverage, mas creio que exista uma maneira melhor de montar isso levando em conta que os strategies estão herdando a interface genérica que chama o provision
 
 ## Próximos passos
 Como próximas tarefas, caso houvesse mais tempo eu adicionaria:
 -Fazer a autenticação de cada usuario e limitar os tipos de conteúdo a qual ele tem acesso para apenas os permitidos
--Tirar a lista hardcoded do frontend e ter um /get apenas para os conteúdos permitidos para o user
+-Tirar a lista hardcoded do frontend e ter um /get apenas para os conteúdos permitidos para o use
 -Mudar as URLs para https (localmente não há nenhum problema, mas em um projeto em produção sim)
 -implementar mais testes e tipagems de retorno de erros.
 
