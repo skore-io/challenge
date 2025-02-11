@@ -1,0 +1,26 @@
+{
+  "ContentList": {
+    "description": "Auto imported from components/ContentList.vue"
+  },
+  "ContentPlayer": {
+    "description": "Auto imported from components/ContentPlayer.vue"
+  },
+  "ProgressBar": {
+    "description": "Auto imported from components/ProgressBar.vue"
+  },
+  "PlayersImagePlayer": {
+    "description": "Auto imported from components/players/ImagePlayer.vue"
+  },
+  "PlayersLinkPlayer": {
+    "description": "Auto imported from components/players/LinkPlayer.vue"
+  },
+  "PlayersPdfPlayer": {
+    "description": "Auto imported from components/players/PdfPlayer.vue"
+  },
+  "PlayersTextPlayer": {
+    "description": "Auto imported from components/players/TextPlayer.vue"
+  },
+  "PlayersVideoPlayer": {
+    "description": "Auto imported from components/players/VideoPlayer.vue"
+  }
+}

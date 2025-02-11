@@ -18,6 +18,9 @@ export class ProvisionDto {
   @Field(() => String, { nullable: true })
   cover?: string
 
+  @Field(() => String, { nullable: true })
+  contentBody?: string //usado apenas para arquivos txt
+
   @Field(() => String)
   url: string
 

@@ -14,6 +14,6 @@ export class ContentResolver {
   @Query(() => ProvisionDto)
   provision(@Args('content_id') contentId: string, @Context('req') req): Promise<ProvisionDto> {
     this.logger.log(`Provisioning content=${contentId} to user=${req.user.id}`)
-    return this.contentService.provision(contentId)
+    return this.contentService.provision(contentId) //chamando o provision na service
   }
 }

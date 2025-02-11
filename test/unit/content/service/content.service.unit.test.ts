@@ -223,4 +223,41 @@ export class ContentServiceUnitTest {
     expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('File system error'))
     expect(result.bytes).toBe(0)
   }
+
+  //teste para o filepath que foi gerado
+  @test
+  async '[provision] Should generate filePath based on content URL'() {
+    jest.spyOn(this.contentRepository, 'findOne').mockResolvedValue(this.mockContent('pdf', 'pdf'))
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    jest.spyOn(fs, 'statSync').mockReturnValue({ size: 50000 } as fs.Stats)
+
+    const contentId = '4372ebd1-2ee8-4501-9ed5-549df46d0eb0'
+    const result = await this.contentService.provision(contentId)
+
+    const filePath = this.mockContent('pdf', 'pdf').url
+
+    expect(result).toMatchObject({
+      type: 'pdf',
+      allow_download: true,
+      is_embeddable: false,
+      format: 'pdf',
+      bytes: 50000,
+      metadata: { author: 'Unknown', pages: 1, encrypted: false },
+    })
+    expect(filePath).toBe('http://localhost:3000/uploads/dummy.pdf')
+  }
+
+  //teste para a url gerada
+  @test
+  async '[provision] Should generate signed URL based on content URL'() {
+    jest.spyOn(this.contentRepository, 'findOne').mockResolvedValue(this.mockContent('pdf', 'pdf'))
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    jest.spyOn(fs, 'statSync').mockReturnValue({ size: 50000 } as fs.Stats)
+
+    const contentId = '4372ebd1-2ee8-4501-9ed5-549df46d0eb0'
+    const result = await this.contentService.provision(contentId)
+    const signedUrlPattern =
+      /http:\/\/localhost:3000\/uploads\/dummy\.pdf\?expires=\d+&signature=\w+/
+    expect(result.url).toMatch(signedUrlPattern)
+  }
 }
