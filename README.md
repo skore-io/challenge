@@ -24,8 +24,11 @@ Anotações:
 ## Próximos passos
 Como próximas tarefas, caso houvesse mais tempo eu adicionaria:
 -Fazer a autenticação de cada usuario e limitar os tipos de conteúdo a qual ele tem acesso para apenas os permitidos
+
 -Tirar a lista hardcoded do frontend e ter um /get apenas para os conteúdos permitidos para o use
+
 -Mudar as URLs para https (localmente não há nenhum problema, mas em um projeto em produção sim)
+
 -implementar mais testes e tipagems de retorno de erros.
 
 
