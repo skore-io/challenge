@@ -1,0 +1,16 @@
+name: Close PRs
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Pull Request
+        uses: peter-evans/close-pull@v3
+        with:
+          pull-request-number: 1
+          comment: Este repositório não aceita pull requests. Envie o link do seu fork para o recrutador.
+          delete-branch: true
