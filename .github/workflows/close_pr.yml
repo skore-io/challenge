@@ -1,0 +1,14 @@
+name: Close PR
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Pull Request
+        run: gh pr close --comment "Este repositório não aceita pull requests. Envie o link do seu fork para o recrutador." --delete-branch "1"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
